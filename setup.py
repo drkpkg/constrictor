@@ -14,4 +14,6 @@ setup(
         [console_scripts]
         constrictor=constrictor.cli:main
     '''
+    long_description="Constrictor microframework",
+    long_description_content_type="text/markdown",
 )
