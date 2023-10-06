@@ -1,0 +1,5 @@
+Flask==2.0.1
+click==8.0.3
+pytest==7.1.0
+pytest-flask==1.2.0
+python-dotenv==0.19.1
