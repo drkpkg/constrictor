@@ -8,7 +8,6 @@ setup(
     install_requires=[
         'click',
         'Flask',
-        # Add other dependencies if needed
     ],
     entry_points='''
         [console_scripts]
