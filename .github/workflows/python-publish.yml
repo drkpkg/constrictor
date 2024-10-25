@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python 3.12 manually without uses
         run: |
           sudo apt-get update
-          sudo apt-get install python3.12 python3.12-venv
+          sudo apt-get install python3 python3-virtualenv
           python3.12 -m venv .venv
           source .venv/bin/activate
           python -m pip install --upgrade pip
