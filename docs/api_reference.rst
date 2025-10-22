@@ -7,7 +7,7 @@ Core Modules
 ------------
 
 constrictor.cli
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
 
 Command-line interface module.
 
@@ -69,6 +69,7 @@ YamlTemplateParser
    :members:
    :undoc-members:
    :show-inheritance:
+   :no-index:
 
 Blueprint Loader Functions
 --------------------------
@@ -77,6 +78,7 @@ Module Loading
 ~~~~~~~~~~~~~~
 
 .. autofunction:: constrictor.blueprint_loader.load
+   :no-index:
 
 Helper Functions
 ~~~~~~~~~~~~~~~~
@@ -84,6 +86,7 @@ Helper Functions
 .. autofunction:: constrictor.blueprint_loader._load_module_blueprint
 
 .. autofunction:: constrictor.blueprint_loader.get_loaded_modules
+   :no-index:
 
 Utility Functions
 -----------------
@@ -92,16 +95,19 @@ Name Validation
 ~~~~~~~~~~~~~~~
 
 .. autofunction:: constrictor.cli.validate_name
+   :no-index:
 
 Command Execution
 ~~~~~~~~~~~~~~~~~
 
 .. autofunction:: constrictor.cli.run_command
+   :no-index:
 
 Template Generation
 ~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: constrictor.yaml_parser.generate_module_from_yaml
+   :no-index:
 
 Configuration
 -------------
@@ -159,11 +165,11 @@ Error Handling
 Custom Exceptions
 ~~~~~~~~~~~~~~~~~
 
-.. autoexception:: constrictor.yaml_parser.TemplateNotFound
+Constrictor uses standard Python exceptions for error handling:
 
-.. autoexception:: constrictor.yaml_parser.TemplateParseError
-
-.. autoexception:: constrictor.blueprint_loader.ModuleLoadError
+- ``FileNotFoundError``: When template files are not found
+- ``ValueError``: When invalid parameters are provided
+- ``RuntimeError``: When module loading fails
 
 Error Codes
 ~~~~~~~~~~~
@@ -223,9 +229,10 @@ Constrictor uses pytest for testing:
 Test Fixtures
 ~~~~~~~~~~~~~
 
-.. autofunction:: constrictor.tests.test_constrictor.app
+Constrictor provides pytest fixtures for testing Flask applications:
 
-.. autofunction:: constrictor.tests.test_constrictor.client
+- ``app``: Flask application fixture
+- ``client``: Test client fixture
 
 Test Functions
 ~~~~~~~~~~~~~~

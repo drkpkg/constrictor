@@ -202,6 +202,7 @@ This example shows how to create a complete e-commerce system.
               }
 
    **Cart Module** (``modules/cart/routes.py``):
+
    .. code-block:: python
 
       from flask import Blueprint, request, jsonify
@@ -338,6 +339,7 @@ This example shows how to create a multi-tenant application.
 3. **Add tenant isolation**:
 
    **Tenant Middleware** (``app.py``):
+
    .. code-block:: python
 
       from flask import Flask, request, g

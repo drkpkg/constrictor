@@ -10,8 +10,10 @@ build:
   tools:
     python: "3.10"
   commands:
-    # Install dependencies
-    - pip install -e .[dev]
+    # Install documentation dependencies first
+    - pip install -r docs/requirements.txt
+    # Install the package
+    - pip install -e .
     # Build the documentation
     - sphinx-build -W -b html docs docs/_build/html
 
@@ -23,9 +25,3 @@ sphinx:
 formats:
   - pdf
   - epub
-
-# Optional but recommended. Read the Docs will use pip to install your package
-# along with your dependencies.
-python:
-  install:
-    - requirements: docs/requirements.txt

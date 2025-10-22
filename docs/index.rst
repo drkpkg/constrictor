@@ -1,5 +1,5 @@
 Constrictor Documentation
-========================
+==========================
 
 Constrictor is a microframework based on Flask, designed to simplify the creation and management of modular Flask applications. With features inspired by Rails, Constrictor allows for easy module generation, testing, and execution using YAML-based templates for maximum flexibility.
 

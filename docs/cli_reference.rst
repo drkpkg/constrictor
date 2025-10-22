@@ -158,7 +158,7 @@ Testing Commands
 ----------------
 
 constrictor test
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 Run tests for modules.
 
