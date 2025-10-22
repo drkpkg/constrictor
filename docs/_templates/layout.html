@@ -1,0 +1,13 @@
+{% extends "!layout.html" %}
+
+{% block extrahead %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ pathto('_static/custom.css', 1) }}" type="text/css" />
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+    <div class="footer">
+        <p>&copy; 2024 Constrictor Framework. Built with Sphinx and Read the Docs.</p>
+    </div>
+{% endblock %}

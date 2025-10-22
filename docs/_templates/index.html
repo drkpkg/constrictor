@@ -1,0 +1,40 @@
+{% extends "!index.html" %}
+
+{% block body %}
+    {{ super() }}
+    
+    <div class="toctree-wrapper compound">
+        <h2>Quick Start</h2>
+        <p>Get started with Constrictor in minutes:</p>
+        <div class="highlight-bash notranslate">
+            <div class="highlight">
+                <pre><span></span><span class="nb">pip</span> install constrictor
+<span class="nb">constrictor</span> new my_project
+<span class="nb">cd</span> my_project
+<span class="nb">constrictor</span> generate blog
+<span class="nb">constrictor</span> run</pre>
+            </div>
+        </div>
+        
+        <h2>Features</h2>
+        <ul class="simple">
+            <li><strong>Modular Structure</strong>: Organize your Flask app into separate modules</li>
+            <li><strong>YAML Templates</strong>: Generate modules using declarative templates</li>
+            <li><strong>Blueprint Support</strong>: Seamless integration with Flask Blueprints</li>
+            <li><strong>CLI Interface</strong>: Simple commands for project management</li>
+            <li><strong>Automated Testing</strong>: Built-in test generation and execution</li>
+        </ul>
+        
+        <h2>Documentation</h2>
+        <p>Comprehensive documentation covering:</p>
+        <ul class="simple">
+            <li><a class="reference internal" href="installation.html">Installation Guide</a></li>
+            <li><a class="reference internal" href="quickstart.html">Quick Start Guide</a></li>
+            <li><a class="reference internal" href="architecture.html">Architecture Overview</a></li>
+            <li><a class="reference internal" href="yaml_templates.html">YAML Templates</a></li>
+            <li><a class="reference internal" href="cli_reference.html">CLI Reference</a></li>
+            <li><a class="reference internal" href="api_reference.html">API Reference</a></li>
+            <li><a class="reference internal" href="examples.html">Usage Examples</a></li>
+        </ul>
+    </div>
+{% endblock %}

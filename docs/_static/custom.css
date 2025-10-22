@@ -1,0 +1,135 @@
+/* Custom CSS for Constrictor documentation */
+
+/* Custom styling for code blocks */
+.highlight {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+/* Custom styling for notes and warnings */
+.admonition {
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.admonition.note {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+}
+
+.admonition.warning {
+    background-color: #fff3e0;
+    border-left: 4px solid #ff9800;
+}
+
+.admonition.tip {
+    background-color: #e8f5e8;
+    border-left: 4px solid #4caf50;
+}
+
+/* Custom styling for buttons */
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+
+/* Custom styling for tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* Custom styling for navigation */
+.wy-nav-side {
+    background-color: #2c3e50;
+}
+
+.wy-nav-top {
+    background-color: #34495e;
+}
+
+/* Custom styling for content */
+.wy-content-for-layout {
+    max-width: 1200px;
+}
+
+/* Custom styling for code */
+code {
+    background-color: #f1f1f1;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+
+/* Custom styling for headers */
+h1, h2, h3, h4, h5, h6 {
+    color: #2c3e50;
+}
+
+/* Custom styling for links */
+a {
+    color: #007bff;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+/* Custom styling for search */
+.wy-side-nav-search {
+    background-color: #34495e;
+}
+
+/* Custom styling for footer */
+.wy-footer {
+    background-color: #2c3e50;
+    color: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .wy-nav-side {
+        width: 100%;
+    }
+    
+    .wy-content-for-layout {
+        margin-left: 0;
+    }
+}
