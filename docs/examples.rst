@@ -287,17 +287,7 @@ This example shows how to create a content management system.
       templates:
         - name: "index.html"
           path: "{{module_name}}/index.html"
-          content: |
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>{{module_name|title}} Management</title>
-            </head>
-            <body>
-                <h1>{{module_name|title}} Management</h1>
-                <a href="/{{module_name}}/create">Create New {{module_name|title}}</a>
-            </body>
-            </html>
+          content: "Simple HTML template for {{module_name}}"
 
 4. **Generate modules with custom templates**:
 
