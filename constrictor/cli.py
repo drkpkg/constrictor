@@ -137,7 +137,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from flask import Flask
-from constrictor import load, db, migrate
+from constrictor import load, db, migrate, login_manager
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev')
@@ -146,6 +146,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 migrate.init_app(app, db)
+login_manager.init_app(app)
 
 load(app)
 
@@ -241,6 +242,7 @@ Flask>=3.0.3
 python-dotenv>=1.0.1
 Flask-SQLAlchemy>=3.1.1
 Flask-Migrate>=4.0.7
+Flask-Login>=0.6.3
 '''
         
         with open(project_path / "requirements.txt", 'w') as f:
@@ -259,7 +261,8 @@ Flask-Migrate>=4.0.7
             
             if pip_path.exists():
                 run_command([str(pip_path), "install", "constrictor-framework>=1.0.0", "Flask>=3.0.3",
-                             "python-dotenv>=1.0.1", "Flask-SQLAlchemy>=3.1.1", "Flask-Migrate>=4.0.7"],
+                             "python-dotenv>=1.0.1", "Flask-SQLAlchemy>=3.1.1", "Flask-Migrate>=4.0.7",
+                             "Flask-Login>=0.6.3"],
                             cwd=project_name)
             else:
                 click.echo("Warning: Virtual environment creation failed, skipping package installation")
@@ -538,6 +541,30 @@ def _run_migration_hooks(hook_name: str, modules: List[str]) -> None:
             raise click.Abort()
 
 
+def _seed_access_csv(modules: List[str]) -> None:
+    """
+    Seed auth_role/auth_model_access from every module's access.csv, if
+    present. Insert-if-missing only (see seed_access_from_csv) - safe to run
+    on every upgrade.
+    """
+    csv_modules = [
+        name for name in modules
+        if os.path.exists(os.path.join('modules', name, 'access.csv'))
+    ]
+    if not csv_modules:
+        return
+
+    from constrictor.auth import seed_access_from_csv
+
+    app = _load_project_app()
+    with app.app_context():
+        for module_name in csv_modules:
+            csv_path = os.path.join('modules', module_name, 'access.csv')
+            inserted = seed_access_from_csv(csv_path)
+            if inserted:
+                click.echo(f"Seeded {inserted} access grant(s) from '{module_name}/access.csv'")
+
+
 def _run_flask_db_command(args: List[str]) -> subprocess.CompletedProcess:
     """Run `flask db <args>` for the current project and echo its output."""
     env = project_env()
@@ -600,7 +627,8 @@ def db_migrate(message):
 def db_upgrade(revision):
     """Apply migrations up to REVISION (default: head).
 
-    Runs each module's optional premigrate.py before and postmigrate.py after.
+    Runs each module's optional premigrate.py before, seeds auth_role/
+    auth_model_access from each module's access.csv, then runs postmigrate.py.
     """
     _require_project()
     if not os.path.exists('migrations'):
@@ -617,6 +645,7 @@ def db_upgrade(revision):
     if result.returncode != 0:
         raise click.Abort()
 
+    _seed_access_csv(modules)
     _run_migration_hooks('postmigrate', modules)
     click.echo("Database upgraded successfully!")
 
@@ -643,6 +672,96 @@ def db_downgrade(revision):
 
     _run_migration_hooks('postmigrate', modules)
     click.echo("Database downgraded successfully!")
+
+
+@main.group(name='auth')
+def auth_group():
+    """User and role management commands.
+
+    There's no admin UI, so these are the bootstrap path for creating the
+    first role/user - e.g. `constrictor auth create-role admin` followed by
+    `constrictor auth create-user you@example.com --role admin`.
+    """
+    pass
+
+
+@auth_group.command(name='create-role')
+@click.argument('name')
+@click.option('--implies', default=None, help='Name of an existing role this role implies')
+def auth_create_role(name, implies):
+    """Create a role, optionally implying another existing role."""
+    _require_project()
+
+    try:
+        from constrictor import db
+        from constrictor.auth_models import Role
+
+        app = _load_project_app()
+        with app.app_context():
+            if Role.query.filter_by(name=name).first():
+                click.echo(f"Error: Role '{name}' already exists.")
+                raise click.Abort()
+
+            implied_role = None
+            if implies:
+                implied_role = Role.query.filter_by(name=implies).first()
+                if implied_role is None:
+                    click.echo(f"Error: Implied role '{implies}' does not exist.")
+                    raise click.Abort()
+
+            role = Role(name=name, implies=implied_role)
+            db.session.add(role)
+            db.session.commit()
+
+            suffix = f" (implies '{implies}')" if implies else ""
+            click.echo(f"Role '{name}' created{suffix}.")
+    except click.Abort:
+        raise
+    except Exception as e:
+        click.echo(f"Error creating role: {e}")
+        click.echo("Make sure migrations have been applied: constrictor db init && constrictor db migrate && constrictor db upgrade")
+        raise click.Abort()
+
+
+@auth_group.command(name='create-user')
+@click.argument('email')
+@click.option('--role', '-r', 'roles', multiple=True, help='Role to assign (repeatable)')
+@click.password_option()
+def auth_create_user(email, roles, password):
+    """Create a user, optionally assigning one or more existing roles."""
+    _require_project()
+
+    try:
+        from constrictor import db
+        from constrictor.auth_models import Role, User
+
+        app = _load_project_app()
+        with app.app_context():
+            if User.query.filter_by(email=email).first():
+                click.echo(f"Error: User '{email}' already exists.")
+                raise click.Abort()
+
+            user = User(email=email)
+            user.set_password(password)
+
+            for role_name in roles:
+                role = Role.query.filter_by(name=role_name).first()
+                if role is None:
+                    click.echo(f"Error: Role '{role_name}' does not exist. Create it first with 'constrictor auth create-role'.")
+                    raise click.Abort()
+                user.roles.append(role)
+
+            db.session.add(user)
+            db.session.commit()
+
+            suffix = f" with roles: {', '.join(roles)}" if roles else ""
+            click.echo(f"User '{email}' created{suffix}.")
+    except click.Abort:
+        raise
+    except Exception as e:
+        click.echo(f"Error creating user: {e}")
+        click.echo("Make sure migrations have been applied: constrictor db init && constrictor db migrate && constrictor db upgrade")
+        raise click.Abort()
 
 
 @main.group()

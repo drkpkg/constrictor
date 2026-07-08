@@ -134,21 +134,36 @@ class YamlTemplateParser:
                 with open(file_path, 'w') as f:
                     f.write(rendered_content)
     
-    def _generate_routes(self, module_name: str, routes_data: List[Dict[str, Any]], 
+    def _generate_routes(self, module_name: str, routes_data: List[Dict[str, Any]],
                         module_dir: Path, context: Dict[str, Any]) -> None:
         """Generate routes.py file from YAML routes definition."""
-        
-        routes_content = "from flask import Blueprint, render_template\n\n"
+
+        uses_auth = any('roles' in route or 'model_access' in route for route in routes_data)
+
+        routes_content = "from flask import Blueprint, render_template\n"
+        if uses_auth:
+            routes_content += "from constrictor.auth import roles_required, model_access_required\n"
+        routes_content += "\n"
         routes_content += f"blueprint = Blueprint('{module_name}', __name__)\n\n"
-        
+
         for route in routes_data:
             path = self.render_template_content(route['path'], context)
             function_name = route['function']
             method = route.get('method', 'GET')
-            
-            routes_content += f"@blueprint.route('{path}')\n"
+
+            # @blueprint.route(...) must be the outermost decorator - Flask's
+            # route() captures whatever function object is passed to it, so
+            # any auth decorator placed above it here would never actually
+            # run: route() would register the raw, unwrapped function.
+            routes_content += f"@blueprint.route('{path}', methods=['{method}'])\n"
+            if 'roles' in route:
+                roles = ', '.join(repr(role) for role in route['roles'])
+                routes_content += f"@roles_required({roles})\n"
+            if 'model_access' in route:
+                routes_content += f"@model_access_required('{module_name}', '{route['model_access']}')\n"
+
             routes_content += f"def {function_name}():\n"
-            
+
             if route.get('response_type') == 'html' and 'template' in route:
                 template_path = self.render_template_content(route['template'], context)
                 routes_content += f"    return render_template('{template_path}', module_name='{module_name}')\n"
@@ -156,9 +171,9 @@ class YamlTemplateParser:
                 routes_content += f"    return {{'module': '{module_name}', 'status': 'active'}}\n"
             else:
                 routes_content += f"    return 'Hello from {module_name} module!'\n"
-            
+
             routes_content += "\n"
-        
+
         routes_file = module_dir / 'routes.py'
         with open(routes_file, 'w') as f:
             f.write(routes_content)

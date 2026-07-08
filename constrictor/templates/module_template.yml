@@ -44,6 +44,7 @@ routes:
     method: "GET"
     function: "api"
     response_type: "json"
+    model_access: "read"
     swagger:
       summary: "Get {{module_name}} API data"
       description: "Returns JSON data from {{module_name}} module"
@@ -67,6 +68,7 @@ routes:
     method: "GET"
     function: "get_users"
     response_type: "json"
+    model_access: "read"
     swagger:
       summary: "Get users list"
       description: "Returns a list of users from {{module_name}} module"
@@ -125,6 +127,7 @@ routes:
     method: "POST"
     function: "create_user"
     response_type: "json"
+    model_access: "create"
     swagger:
       summary: "Create a new user"
       description: "Creates a new user in {{module_name}} module"
@@ -188,6 +191,7 @@ routes:
     method: "GET"
     function: "get_user"
     response_type: "json"
+    model_access: "read"
     swagger:
       summary: "Get user by ID"
       description: "Returns a specific user by their ID"
@@ -325,10 +329,13 @@ structure:
   files:
     - name: "__init__.py"
       content: "# {{module_name}} module initialization file\n"
-    
-    - name: "routes.py"
-      template: "routes_template.py"
-    
+
+    - name: "access.csv"
+      content: |
+        model,role,can_read,can_create,can_update,can_delete
+        {{module_name}},admin,1,1,1,1
+        {{module_name}},,1,0,0,0
+
     - name: "models.py"
       content: |
         # {{module_name}} models
