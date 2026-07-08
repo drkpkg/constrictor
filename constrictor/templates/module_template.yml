@@ -11,16 +11,227 @@ routes:
     function: "index"
     template: "{{module_name}}/index.html"
     response_type: "html"
+    swagger:
+      summary: "Get {{module_name}} index page"
+      description: "Returns the main page for {{module_name}} module"
+      tags: ["{{module_name}}"]
+      responses:
+        200:
+          description: "HTML page rendered successfully"
+          content:
+            text/html:
+              schema:
+                type: string
   
   - path: "/{{module_name}}/hello/"
     method: "GET"
     function: "hello"
     response_type: "text"
+    swagger:
+      summary: "Hello endpoint for {{module_name}}"
+      description: "Returns a simple hello message from {{module_name}} module"
+      tags: ["{{module_name}}"]
+      responses:
+        200:
+          description: "Hello message returned successfully"
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Hello from {{module_name}} module!"
   
   - path: "/{{module_name}}/api/"
     method: "GET"
     function: "api"
     response_type: "json"
+    swagger:
+      summary: "Get {{module_name}} API data"
+      description: "Returns JSON data from {{module_name}} module"
+      tags: ["{{module_name}}", "api"]
+      responses:
+        200:
+          description: "Successful response"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  module:
+                    type: string
+                    example: "{{module_name}}"
+                  status:
+                    type: string
+                    example: "active"
+  
+  - path: "/{{module_name}}/api/users/"
+    method: "GET"
+    function: "get_users"
+    response_type: "json"
+    swagger:
+      summary: "Get users list"
+      description: "Returns a list of users from {{module_name}} module"
+      tags: ["{{module_name}}", "users"]
+      parameters:
+        - name: "limit"
+          in: "query"
+          description: "Maximum number of users to return"
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: "offset"
+          in: "query"
+          description: "Number of users to skip"
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        200:
+          description: "List of users returned successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "John Doe"
+                        email:
+                          type: string
+                          example: "john@example.com"
+                  total:
+                    type: integer
+                    example: 100
+                  limit:
+                    type: integer
+                    example: 10
+                  offset:
+                    type: integer
+                    example: 0
+  
+  - path: "/{{module_name}}/api/users/"
+    method: "POST"
+    function: "create_user"
+    response_type: "json"
+    swagger:
+      summary: "Create a new user"
+      description: "Creates a new user in {{module_name}} module"
+      tags: ["{{module_name}}", "users"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: ["name", "email"]
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                  description: "User's full name"
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                  description: "User's email address"
+                age:
+                  type: integer
+                  minimum: 0
+                  maximum: 120
+                  example: 25
+                  description: "User's age"
+      responses:
+        201:
+          description: "User created successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "John Doe"
+                  email:
+                    type: string
+                    example: "john@example.com"
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2023-01-01T00:00:00Z"
+        400:
+          description: "Invalid input data"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid email format"
+  
+  - path: "/{{module_name}}/api/users/<int:user_id>/"
+    method: "GET"
+    function: "get_user"
+    response_type: "json"
+    swagger:
+      summary: "Get user by ID"
+      description: "Returns a specific user by their ID"
+      tags: ["{{module_name}}", "users"]
+      parameters:
+        - name: "user_id"
+          in: "path"
+          description: "ID of the user to retrieve"
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            example: 1
+      responses:
+        200:
+          description: "User found and returned successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: "John Doe"
+                  email:
+                    type: string
+                    example: "john@example.com"
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2023-01-01T00:00:00Z"
+        404:
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User not found"
 
 templates:
   - name: "index.html"
@@ -109,7 +320,6 @@ structure:
   directories:
     - "tests"
     - "views"
-    - "models"
     - "static"
   
   files:
@@ -123,20 +333,28 @@ structure:
       content: |
         # {{module_name}} models
         from datetime import datetime
-        
-        class {{module_name|title}}Model:
-            """Model for {{module_name}} module."""
-            
-            def __init__(self, name=None):
-                self.id = None
-                self.name = name
-                self.created_at = datetime.utcnow()
-            
+        from constrictor import db
+
+
+        class {{module_name|title}}Model(db.Model):
+            """Model for {{module_name}} module.
+
+            Import `db` from `constrictor` rather than creating your own
+            SQLAlchemy() instance, so this table registers on the shared
+            metadata that `constrictor db migrate` autogenerates revisions from.
+            """
+
+            __tablename__ = "{{module_name}}"
+
+            id = db.Column(db.Integer, primary_key=True)
+            name = db.Column(db.String(255), nullable=False)
+            created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
             def to_dict(self):
                 return {
                     'id': self.id,
                     'name': self.name,
-                    'created_at': self.created_at.isoformat()
+                    'created_at': self.created_at.isoformat() if self.created_at else None
                 }
     
     - name: "views.py"

@@ -28,6 +28,9 @@ setup(
     url="https://github.com/daniel/constrictor",
     packages=find_packages(),
     include_package_data=True,
+    package_data={
+        'constrictor': ['templates/*.yml', 'templates/*.yaml', 'templates/*.py'],
+    },
     install_requires=read_requirements(),
     extras_require={
         'dev': [

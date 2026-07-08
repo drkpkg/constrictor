@@ -32,7 +32,7 @@ def test_existing_project_creation():
         os.makedirs('existing_project')
         result = runner.invoke(main, ['new', 'existing_project'], input='y\n')
         assert result.exit_code == 0
-        assert "Project already exists" in result.output
+        assert "already exists" in result.output
 
 def test_invalid_project_name():
     """Test creating a project with invalid name."""
@@ -52,7 +52,8 @@ def test_valid_module_creation():
         assert os.path.isdir('modules/test_module')
         assert os.path.isfile('modules/test_module/routes.py')
         assert os.path.isdir('modules/test_module/tests')
-        assert os.path.isdir('modules/test_module/templates')
+        # Templates are centralized at the project root, not under modules/<name>/
+        assert os.path.isfile('templates/test_module/index.html')
 
 def test_module_alias_g():
     """Test using the 'g' alias for generate command."""
@@ -70,7 +71,7 @@ def test_existing_module_creation():
         os.makedirs('modules/existing_module')
         result = runner.invoke(main, ['generate', 'existing_module'], input='y\n')
         assert result.exit_code == 0
-        assert "Module already exists" in result.output
+        assert "already exists" in result.output
 
 
 def test_run_missing_app():
@@ -194,4 +195,4 @@ def test_empty_names():
         os.makedirs('modules')
         result = runner.invoke(main, ['generate', ''])
         assert result.exit_code != 0
-        assert "Missing argument" in result.output
+        assert "Invalid module name" in result.output

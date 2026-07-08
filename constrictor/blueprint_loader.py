@@ -60,6 +60,12 @@ def load(app) -> None:
             logger.error(f"Failed to load module '{module_name}': {e}")
             continue
 
+        try:
+            _load_module_models(module_name, modules_dir)
+        except Exception as e:
+            logger.error(f"Failed to load models for module '{module_name}': {e}")
+            continue
+
 
 def _load_module_blueprint(app, module_name: str, modules_dir: str) -> None:
     """
@@ -101,6 +107,32 @@ def _load_module_blueprint(app, module_name: str, modules_dir: str) -> None:
         raise
     except AttributeError as e:
         logger.error(f"Module '{module_name}' doesn't have required blueprint attribute: {e}")
+        raise
+
+
+def _load_module_models(module_name: str, modules_dir: str) -> None:
+    """
+    Import a module's models.py, if present, so its db.Model classes
+    register onto the shared SQLAlchemy metadata (used by Flask-Migrate's
+    autogenerate). Models are optional, so a missing file is not an error.
+
+    Args:
+        module_name: Name of the module to load
+        modules_dir: Path to the modules directory
+
+    Raises:
+        ImportError: If models.py exists but cannot be imported
+    """
+    models_file = os.path.join(modules_dir, module_name, "models.py")
+
+    if not os.path.exists(models_file):
+        return
+
+    try:
+        import_module(f"modules.{module_name}.models")
+        logger.info(f"Successfully loaded models for module '{module_name}'")
+    except ImportError as e:
+        logger.error(f"Failed to import models from module '{module_name}': {e}")
         raise
 
 

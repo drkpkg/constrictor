@@ -111,7 +111,7 @@ class YamlTemplateParser:
                 dir_path.mkdir(exist_ok=True)
                 
                 # Create __init__.py for Python directories
-                if dir_name in ['tests', 'views', 'models']:
+                if dir_name in ['tests', 'views']:
                     init_file = dir_path / '__init__.py'
                     with open(init_file, 'w') as f:
                         f.write(f"# {module_name} {dir_name} initialization file\n")
